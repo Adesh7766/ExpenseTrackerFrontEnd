@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { transactionService } from '../../Services/transactionService';
+import { userService } from '../../Services/userService';
+import { statusService } from '../../Services/statusService';
+import { categoryService } from '../../Services/categoryService';
 import './CreateTransactionForm.css';
 
 const CreateTransactionForm = ({ onClose, onSuccess, transactionId }) => {
@@ -11,16 +14,65 @@ const CreateTransactionForm = ({ onClose, onSuccess, transactionId }) => {
         category: '',
         isActive: true
     });
-
+    const [users, setUsers] = useState([]);
+    const [statuses, setStatuses] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
+        fetchUsers();
+        fetchStatuses();
+        fetchCategories();
         if (transactionId) {
             fetchTransaction();
         }
     }, [transactionId]);
+
+    const fetchUsers = async () => {
+        try {
+            const response = await userService.getAllUsers('');
+            if (Array.isArray(response)) {
+                setUsers(response);
+            } else if (response && Array.isArray(response.users)) {
+                setUsers(response.users);
+            } else {
+                throw new Error('Invalid response format from API');
+            }
+        } catch (err) {
+            console.error('Error fetching users:', err);
+            setError('Failed to fetch users');
+        }
+    };
+
+    const fetchStatuses = async () => {
+        try {
+            const response = await statusService.getAllStatuses('', '');
+            if (response && response.success && Array.isArray(response.status)) {
+                setStatuses(response.status);
+            } else {
+                throw new Error('Invalid response format from API');
+            }
+        } catch (err) {
+            console.error('Error fetching statuses:', err);
+            setError('Failed to fetch statuses');
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await categoryService.getAllCategories('', '');
+            if (response && response.success && Array.isArray(response.categories)) {
+                setCategories(response.categories);
+            } else {
+                throw new Error('Invalid response format from API');
+            }
+        } catch (err) {
+            console.error('Error fetching categories:', err);
+            setError('Failed to fetch categories');
+        }
+    };
 
     const fetchTransaction = async () => {
         try {
@@ -85,27 +137,40 @@ const CreateTransactionForm = ({ onClose, onSuccess, transactionId }) => {
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="createdBy">Created By:</label>
-                        <input
-                            type="text"
+                        <select
                             id="createdBy"
                             name="createdBy"
                             value={formData.createdBy}
                             onChange={handleChange}
                             required
-                        />
+                            className="form-select"
+                        >
+                            <option value="">Select a user</option>
+                            {users.map(user => (
+                                <option key={user.id} value={user.fullName}>
+                                    {user.fullName}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="status">Status:</label>
-                        <input
-                            type="text"
+                        <select
                             id="status"
                             name="status"
                             value={formData.status}
                             onChange={handleChange}
-                            placeholder="e.g., PEND"
                             required
-                        />
+                            className="form-select"
+                        >
+                            <option value="">Select a status</option>
+                            {statuses.map(status => (
+                                <option key={status.id} value={status.code}>
+                                    {status.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="form-group">
@@ -136,15 +201,21 @@ const CreateTransactionForm = ({ onClose, onSuccess, transactionId }) => {
 
                     <div className="form-group">
                         <label htmlFor="category">Category:</label>
-                        <input
-                            type="text"
+                        <select
                             id="category"
                             name="category"
                             value={formData.category}
                             onChange={handleChange}
-                            placeholder="e.g., FOOD"
                             required
-                        />
+                            className="form-select"
+                        >
+                            <option value="">Select a category</option>
+                            {categories.map(category => (
+                                <option key={category.id} value={category.code}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="form-group checkbox-group">

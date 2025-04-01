@@ -30,6 +30,16 @@ const Navbar = () => {
                         Categories
                     </Link>
                 </li>
+                <li>
+                    <Link to="/statuses" className={isActive('/statuses')}>
+                        Statuses
+                    </Link>
+                </li>
+                <li>
+                    <Link to="/users" className={isActive('/users')}>
+                        Users
+                    </Link>
+                </li>
             </ul>
         </nav>
     );

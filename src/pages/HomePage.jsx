@@ -28,6 +28,22 @@ const HomePage = () => {
                             Go to Categories
                         </Link>
                     </div>
+
+                    <div className="feature-card">
+                        <h3>Statuses</h3>
+                        <p>Manage transaction statuses to track their progress.</p>
+                        <Link to="/statuses" className="feature-link">
+                            Go to Statuses
+                        </Link>
+                    </div>
+
+                    <div className="feature-card">
+                        <h3>Users</h3>
+                        <p>Register and manage users for the expense tracker.</p>
+                        <Link to="/users" className="feature-link">
+                            Register User
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

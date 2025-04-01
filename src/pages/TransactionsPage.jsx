@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { transactionService } from '../Services/transactionService';
 import CreateTransactionForm from '../components/CreateTransactionForm/CreateTransactionForm';
+import ConfirmationModal from '../components/ConfirmationModal/ConfirmationModal';
 import './TransactionsPage.css';
 
 const TransactionsPage = () => {
@@ -9,6 +10,10 @@ const TransactionsPage = () => {
     const [error, setError] = useState(null);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingTransactionId, setEditingTransactionId] = useState(null);
+    const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        transaction: null
+    });
     const [filters, setFilters] = useState({
         name: '',
         statusCode: '',
@@ -56,37 +61,48 @@ const TransactionsPage = () => {
         fetchTransactions();
     };
 
-    const handleCreateSuccess = () => {
-        fetchTransactions();
-    };
-
     const handleEdit = (transaction) => {
         setEditingTransactionId(transaction.id);
         setShowCreateForm(true);
     };
 
+    const handleDelete = (transaction) => {
+        setDeleteModal({
+            isOpen: true,
+            transaction: transaction
+        });
+    };
+
+    const confirmDelete = async () => {
+        try {
+            const response = await transactionService.deleteTransaction(deleteModal.transaction.id);
+            if (response.success) {
+                // Show success message if provided
+                if (response.message) {
+                    alert(response.message);
+                }
+                fetchTransactions(); // Refresh the list
+            } else {
+                throw new Error('Failed to delete transaction');
+            }
+        } catch (err) {
+            console.error('Error deleting transaction:', err);
+            setError('Failed to delete transaction');
+        } finally {
+            closeDeleteModal();
+        }
+    };
+
+    const closeDeleteModal = () => {
+        setDeleteModal({
+            isOpen: false,
+            transaction: null
+        });
+    };
+
     const handleFormClose = () => {
         setShowCreateForm(false);
         setEditingTransactionId(null);
-    };
-
-    const handleDelete = async (transaction) => {
-        if (window.confirm('Are you sure you want to delete this transaction?')) {
-            try {
-                const response = await transactionService.deleteTransaction(transaction.id);
-                if (response.success) {
-                    // Show success message
-                    alert(response.message);
-                    // Refresh the transactions list
-                    fetchTransactions();
-                } else {
-                    throw new Error('Failed to delete transaction');
-                }
-            } catch (error) {
-                console.error('Error deleting transaction:', error);
-                setError('Failed to delete transaction');
-            }
-        }
     };
 
     return (
@@ -199,10 +215,19 @@ const TransactionsPage = () => {
             {showCreateForm && (
                 <CreateTransactionForm
                     onClose={handleFormClose}
-                    onSuccess={handleCreateSuccess}
+                    onSuccess={fetchTransactions}
                     transactionId={editingTransactionId}
                 />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={closeDeleteModal}
+                onConfirm={confirmDelete}
+                title="Delete Transaction"
+                message={`Are you sure you want to delete this transaction?`}
+            />
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { transactionService } from '../../Services/transactionService';
+import ConfirmationModal from '../ConfirmationModal/ConfirmationModal';
 import './TransactionList.css';
 
 const TransactionList = () => {
@@ -10,6 +11,10 @@ const TransactionList = () => {
         name: '',
         statusCode: '',
         categoryCode: ''
+    });
+    const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        transaction: null
     });
 
     const fetchTransactions = async () => {
@@ -57,6 +62,40 @@ const TransactionList = () => {
         fetchTransactions();
     };
 
+    const handleDelete = (transaction) => {
+        setDeleteModal({
+            isOpen: true,
+            transaction: transaction
+        });
+    };
+
+    const confirmDelete = async () => {
+        try {
+            const response = await transactionService.deleteTransaction(deleteModal.transaction.id);
+            if (response.success) {
+                alert(response.message);
+                fetchTransactions();
+            } else {
+                throw new Error('Failed to delete transaction');
+            }
+        } catch (err) {
+            console.error('Error deleting transaction:', err);
+            setError('Failed to delete transaction');
+        } finally {
+            setDeleteModal({
+                isOpen: false,
+                transaction: null
+            });
+        }
+    };
+
+    const closeDeleteModal = () => {
+        setDeleteModal({
+            isOpen: false,
+            transaction: null
+        });
+    };
+
     if (loading) return <div>Loading transactions...</div>;
     if (error) return <div className="error">{error}</div>;
 
@@ -67,14 +106,14 @@ const TransactionList = () => {
             {/* Filter Form */}
             <form onSubmit={handleFilterSubmit} className="filter-form">
                 <div className="filter-group">
-                    <label htmlFor="name">Name:</label>
+                    <label htmlFor="name">Transacted By:</label>
                     <input
                         type="text"
                         id="name"
                         name="name"
                         value={filters.name}
                         onChange={handleFilterChange}
-                        placeholder="Enter transaction name"
+                        placeholder="Filter by transaction creator"
                     />
                 </div>
                 <div className="filter-group">
@@ -85,7 +124,7 @@ const TransactionList = () => {
                         name="statusCode"
                         value={filters.statusCode}
                         onChange={handleFilterChange}
-                        placeholder="Enter status (e.g., PEND)"
+                        placeholder="e.g., PEND"
                     />
                 </div>
                 <div className="filter-group">
@@ -96,10 +135,12 @@ const TransactionList = () => {
                         name="categoryCode"
                         value={filters.categoryCode}
                         onChange={handleFilterChange}
-                        placeholder="Enter category (e.g., FOOD)"
+                        placeholder="e.g., FOOD"
                     />
                 </div>
-                <button type="submit">Apply Filters</button>
+                <button type="submit" className="filter-button">
+                    Apply Filters
+                </button>
             </form>
 
             {/* Transactions Table */}
@@ -115,6 +156,7 @@ const TransactionList = () => {
                             <th>Created By</th>
                             <th>Created Date</th>
                             <th>Is Active</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -129,16 +171,41 @@ const TransactionList = () => {
                                     <td>{transaction.createdBy}</td>
                                     <td>{new Date(transaction.createdDate).toLocaleDateString()}</td>
                                     <td>{transaction.isActive ? 'Yes' : 'No'}</td>
+                                    <td className="actions-cell">
+                                        <button 
+                                            className="action-button edit-button"
+                                            onClick={() => handleEdit(transaction)}
+                                            title="Edit"
+                                        >
+                                            ✎
+                                        </button>
+                                        <button 
+                                            className="action-button delete-button"
+                                            onClick={() => handleDelete(transaction)}
+                                            title="Delete"
+                                        >
+                                            ×
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="8" className="no-data">No transactions found</td>
+                                <td colSpan="9" className="no-data">No transactions found</td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={closeDeleteModal}
+                onConfirm={confirmDelete}
+                title="Delete Transaction"
+                message={`Are you sure you want to delete the transaction "${deleteModal.transaction?.description}"?`}
+            />
         </div>
     );
 };
