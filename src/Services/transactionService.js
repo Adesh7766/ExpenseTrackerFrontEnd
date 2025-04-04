@@ -125,5 +125,19 @@ export const transactionService = {
             console.error('Error deleting transaction:', error);
             throw error;
         }
+    },
+
+    getTransactionsByCategory: async () => {
+        try {
+            const response = await fetch('https://localhost:7122/api/Transactions/GetTransactionByCategory');
+            if (!response.ok) {
+                throw new Error('Failed to fetch transactions by category');
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching transactions by category:', error);
+            throw error;
+        }
     }
 }; 

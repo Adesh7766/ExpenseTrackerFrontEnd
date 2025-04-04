@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import TransactionChart from '../components/TransactionChart/TransactionChart';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -9,6 +10,8 @@ const HomePage = () => {
                 <h1>Welcome to Expense Tracker</h1>
                 <p>Manage your expenses efficiently and keep track of your spending habits.</p>
             </div>
+
+            <TransactionChart />
 
             <div className="features-section">
                 <h2>Features</h2>
