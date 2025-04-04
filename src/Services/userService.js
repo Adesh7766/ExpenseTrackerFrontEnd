@@ -31,26 +31,31 @@ export const userService = {
 
     registerUser: async (userData) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/User/RegisterUser`, {
+            const response = await fetch('https://localhost:7122/api/Users/RegisterUser', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    id: 0,
-                    fullName: userData.fullName,
-                    email: userData.email,
-                    password: userData.password,
-                    isActive: userData.isActive
-                })
+                body: JSON.stringify(userData)
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to register user');
             }
+
+            // First try to read the response as text
+            const responseText = await response.text();
             
-            const data = await response.json();
-            return data;
+            // Try to parse as JSON if possible
+            try {
+                return JSON.parse(responseText);
+            } catch (e) {
+                // If it's not JSON, return success with the text message
+                return {
+                    success: true,
+                    message: responseText
+                };
+            }
         } catch (error) {
             console.error('Error registering user:', error);
             throw error;

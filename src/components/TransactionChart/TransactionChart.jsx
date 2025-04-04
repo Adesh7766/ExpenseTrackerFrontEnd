@@ -44,14 +44,21 @@ const TransactionChart = () => {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [totalSpending, setTotalSpending] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await transactionService.getTransactionsByCategory();
-                if (response && Array.isArray(response)) {
-                    const labels = response.map(item => item.category);
-                    const data = response.map(item => item.amountSpent);
+                setLoading(true);
+                // Fetch both chart data and total amount
+                const [chartResponse, totalResponse] = await Promise.all([
+                    transactionService.getTransactionsByCategory(),
+                    transactionService.getTotalAmount()
+                ]);
+
+                if (chartResponse && Array.isArray(chartResponse)) {
+                    const labels = chartResponse.map(item => item.category);
+                    const data = chartResponse.map(item => item.amountSpent);
 
                     setChartData(prev => ({
                         labels: labels,
@@ -61,11 +68,17 @@ const TransactionChart = () => {
                         }]
                     }));
                 } else {
-                    throw new Error('Invalid response format');
+                    throw new Error('Invalid chart data format');
+                }
+
+                if (totalResponse && typeof totalResponse.totalSpending === 'number') {
+                    setTotalSpending(totalResponse.totalSpending);
+                } else {
+                    throw new Error('Invalid total amount format');
                 }
             } catch (err) {
-                console.error('Error fetching chart data:', err);
-                setError('Failed to load chart data');
+                console.error('Error fetching data:', err);
+                setError('Failed to load data');
             } finally {
                 setLoading(false);
             }
@@ -190,7 +203,7 @@ const TransactionChart = () => {
     };
 
     if (loading) {
-        return <div className="chart-loading">Loading chart data...</div>;
+        return <div className="chart-loading">Loading data...</div>;
     }
 
     if (error) {
@@ -198,8 +211,14 @@ const TransactionChart = () => {
     }
 
     return (
-        <div className="transaction-chart">
-            <Bar data={chartData} options={options} />
+        <div className="chart-container">
+            <div className="transaction-chart">
+                <Bar data={chartData} options={options} />
+            </div>
+            <div className="total-spending">
+                <h3>Total Spending</h3>
+                <p className="amount">${totalSpending.toLocaleString()}</p>
+            </div>
         </div>
     );
 };

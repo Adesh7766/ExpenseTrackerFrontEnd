@@ -139,5 +139,19 @@ export const transactionService = {
             console.error('Error fetching transactions by category:', error);
             throw error;
         }
+    },
+
+    getTotalAmount: async () => {
+        try {
+            const response = await fetch('https://localhost:7122/api/Transactions/GetTotalAmount');
+            if (!response.ok) {
+                throw new Error('Failed to fetch total amount');
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching total amount:', error);
+            throw error;
+        }
     }
 }; 

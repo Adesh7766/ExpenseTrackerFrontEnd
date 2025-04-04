@@ -1,9 +1,15 @@
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+}
+
 .transaction-chart {
     background-color: white;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-    margin: 2rem auto;
     width: 100%;
     height: 500px;
     transition: all 0.3s ease;
@@ -12,6 +18,36 @@
 .transaction-chart:hover {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
+}
+
+.total-spending {
+    background-color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.total-spending:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.total-spending h3 {
+    color: #2c3e50;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0 0 0.5rem 0;
+    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+}
+
+.total-spending .amount {
+    color: #2c3e50;
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
 }
 
 .chart-loading {
